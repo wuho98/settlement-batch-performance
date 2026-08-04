@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: settlement-batch-performance
+  main:
+    web-application-type: none
+  datasource:
+    url: ${SETTLEMENT_DB_URL:jdbc:mysql://localhost:3307/settlement_batch?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&rewriteBatchedStatements=true}
+    username: ${SETTLEMENT_DB_USERNAME:settlement}
+    password: ${SETTLEMENT_DB_PASSWORD:settlement}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: Asia/Seoul
+  batch:
+    jdbc:
+      initialize-schema: always

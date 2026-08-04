@@ -1,0 +1,23 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: settlement-batch-mysql
+    environment:
+      MYSQL_DATABASE: settlement_batch
+      MYSQL_USER: settlement
+      MYSQL_PASSWORD: settlement
+      MYSQL_ROOT_PASSWORD: root
+      TZ: Asia/Seoul
+    ports:
+      - "3307:3306"
+    volumes:
+      - settlement-mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 20s
+
+volumes:
+  settlement-mysql-data:
