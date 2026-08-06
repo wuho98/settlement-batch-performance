@@ -176,13 +176,46 @@ export SETTLEMENT_DB_USERNAME='settlement'
 export SETTLEMENT_DB_PASSWORD='settlement'
 ```
 
-### 2. 테스트
+### 2. 스키마 적용 및 10만 건 데이터 생성
+
+새 데이터 볼륨으로 MySQL을 처음 실행하면 `database/init/001-schema.sql`이 자동으로 적용됩니다. 이미 생성된 볼륨을 사용하거나 스키마만 다시 확인하려면 다음 명령을 실행합니다.
+
+```bash
+docker compose exec -T mysql mysql -usettlement -psettlement settlement_batch < database/init/001-schema.sql
+```
+
+기준 데이터셋은 아래 명령으로 생성합니다. 스크립트는 먼저 `settlement` 테이블을 비운 뒤 고정된 공식으로 ID 1부터 100,000까지 다시 생성하므로, 여러 번 실행해도 결과와 분포가 같습니다. 기존 데이터를 보존해야 하는 환경에서는 실행하지 마세요.
+
+```bash
+docker compose exec -T mysql mysql -usettlement -psettlement settlement_batch < database/generate-100k.sql
+```
+
+생성 규칙은 Reader 간 비교에서 데이터 분포를 고정합니다.
+
+| 항목 | 분포 |
+| --- | --- |
+| ID | 1 ~ 100,000, 중복 없음 |
+| Merchant | 1,000개, 각 100건 |
+| Status | `COMPLETED` 80,000 / `PENDING` 15,000 / `FAILED` 5,000 |
+| 일시·금액 | ID 기반의 결정적 공식으로 생성 |
+
+### 3. 데이터 건수와 주요 분포 검증
+
+```bash
+docker compose exec -T mysql mysql -usettlement -psettlement settlement_batch < database/verify-100k.sql
+```
+
+첫 결과는 `total_count=100000`, `distinct_id_count=100000`, `min_id=1`, `max_id=100000`이어야 합니다. 상태별 건수와 판매자 분포도 위 표와 일치해야 합니다. 마지막 결과의 금액·정산일 범위는 실행마다 동일해야 하며, 원본 실험 로그에 함께 보관합니다.
+
+스키마는 JPA 엔티티와 별도로 SQL에서 관리하며 애플리케이션 시작 시 Hibernate가 `ddl-auto: validate`로 매핑 일치 여부를 검사합니다. PK인 `id` 외에 이후 보조 인덱스 실험에 사용할 `(status, settled_at, id)` 인덱스를 정의했습니다.
+
+### 4. 테스트
 
 ```bash
 ./gradlew test
 ```
 
-### 3. 애플리케이션 실행
+### 5. 애플리케이션 실행
 
 ```bash
 ./gradlew bootRun
@@ -190,7 +223,7 @@ export SETTLEMENT_DB_PASSWORD='settlement'
 
 현재는 등록된 Job이 없어 애플리케이션이 초기화된 후 정상 종료됩니다. Reader와 Job 구현이 추가되면 지정된 배치를 실행하고 종료합니다. 웹 서버를 사용하지 않는 배치 전용 애플리케이션이므로 8080 포트를 점유하지 않습니다.
 
-### 4. MySQL 종료
+### 6. MySQL 종료
 
 ```bash
 docker compose down
@@ -217,8 +250,9 @@ docker compose down
 - [x] 프로젝트 전용 Docker MySQL 구성
 - [x] MySQL 기반 애플리케이션 컨텍스트 테스트
 - [x] 배치 전용 non-web 실행 환경 구성
-- [ ] 정산 도메인 및 스키마 설계
-- [ ] 10만·50만·100만 건 데이터 생성 스크립트
+- [x] 정산 도메인 및 MySQL 스키마 설계
+- [x] 재현 가능한 10만 건 데이터 생성 및 검증 스크립트
+- [ ] 50만·100만 건 데이터 생성 스크립트
 - [ ] `JpaPagingItemReader` Job 구현
 - [ ] JPA 기반 `ZeroOffsetItemReader` 직접 구현
 - [ ] 누락·중복·재시작 테스트
