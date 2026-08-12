@@ -7,8 +7,10 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create-drop
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:batch-schema-mysql.sql
   batch:
-    jdbc:
-      initialize-schema: always
     job:
       enabled: false

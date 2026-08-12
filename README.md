@@ -234,6 +234,9 @@ Zero Offset 방식은 아래 Job 이름으로 실행합니다. 이 Reader는 Ste
 ./gradlew bootRun --args='--spring.batch.job.name=zeroOffsetSettlementJob run.id=1'
 ```
 
+두 Reader의 재시작 체크포인트와 Job 실행 이력은 MySQL의 Spring Batch 메타데이터 테이블에
+저장됩니다. 애플리케이션 시작 시 필요한 메타데이터 테이블이 없으면 자동으로 생성합니다.
+
 웹 서버를 사용하지 않는 배치 전용 애플리케이션이므로 8080 포트를 점유하지 않습니다.
 
 ### 6. MySQL 종료
@@ -267,8 +270,8 @@ docker compose down
 - [x] 재현 가능한 10만 건 데이터 생성 및 검증 스크립트
 - [ ] 50만·100만 건 데이터 생성 스크립트
 - [x] `JpaPagingItemReader` Job 구현
-- [ ] JPA 기반 `ZeroOffsetItemReader` 직접 구현
-- [ ] 누락·중복·재시작 테스트
+- [x] JPA 기반 `ZeroOffsetItemReader` 직접 구현
+- [x] 누락·중복·재시작 테스트
 - [ ] 3회 반복 성능 측정 및 결과 시각화
 - [ ] 보조 인덱스 ON/OFF와 실행 계획 비교
 - [ ] GC 로그 및 힙 사용량 분석
