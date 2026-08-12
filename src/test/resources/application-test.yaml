@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    url: jdbc:tc:mysql:8.4:///settlement_batch
+    username: settlement
+    password: settlement
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+  batch:
+    jdbc:
+      initialize-schema: always
+    job:
+      enabled: false

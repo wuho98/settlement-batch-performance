@@ -218,10 +218,16 @@ docker compose exec -T mysql mysql -usettlement -psettlement settlement_batch < 
 ### 5. 애플리케이션 실행
 
 ```bash
-./gradlew bootRun
+./gradlew bootRun --args='--spring.batch.job.name=pagingSettlementJob'
 ```
 
-현재는 등록된 Job이 없어 애플리케이션이 초기화된 후 정상 종료됩니다. Reader와 Job 구현이 추가되면 지정된 배치를 실행하고 종료합니다. 웹 서버를 사용하지 않는 배치 전용 애플리케이션이므로 8080 포트를 점유하지 않습니다.
+`pagingSettlementJob`은 `JpaPagingItemReader`로 `settlement` 전체를 `id ASC` 순서로 읽습니다. page size와 chunk size는 모두 1,000이며, Writer는 별도 저장 I/O를 만들지 않습니다. 실행 로그의 `COMPLETED` 상태로 정상 종료를 확인하고, 자동 테스트에서 원본 건수와 Step의 `readCount`·`writeCount`가 같은지 검증합니다. 매번 새 Job 인스턴스로 실행하려면 고유 파라미터를 추가합니다.
+
+```bash
+./gradlew bootRun --args='--spring.batch.job.name=pagingSettlementJob run.id=1'
+```
+
+웹 서버를 사용하지 않는 배치 전용 애플리케이션이므로 8080 포트를 점유하지 않습니다.
 
 ### 6. MySQL 종료
 
@@ -253,7 +259,7 @@ docker compose down
 - [x] 정산 도메인 및 MySQL 스키마 설계
 - [x] 재현 가능한 10만 건 데이터 생성 및 검증 스크립트
 - [ ] 50만·100만 건 데이터 생성 스크립트
-- [ ] `JpaPagingItemReader` Job 구현
+- [x] `JpaPagingItemReader` Job 구현
 - [ ] JPA 기반 `ZeroOffsetItemReader` 직접 구현
 - [ ] 누락·중복·재시작 테스트
 - [ ] 3회 반복 성능 측정 및 결과 시각화

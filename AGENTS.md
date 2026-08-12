@@ -95,7 +95,7 @@ Settlement(
 
 | Reader | 조회 방식 | 구현 위치 |
 | --- | --- | --- |
-| `JpaPagingItemReader` | `LIMIT-OFFSET` 기반 페이지 조회 | (예정) |
+| `JpaPagingItemReader` | `LIMIT-OFFSET` 기반 페이지 조회 | `src/main/java/com/example/settlementbatchperformance/job/PagingSettlementJobConfig.java` |
 | `ZeroOffsetItemReader` | `WHERE id > :lastId ORDER BY id ASC` | (예정) |
 | `JpaCursorItemReader` | 메모리 특성 확인용 선택 실험 | (예정) |
 
