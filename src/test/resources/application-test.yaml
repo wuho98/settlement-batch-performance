@@ -1,9 +1,9 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:settlement-batch-test;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
-    username: sa
-    password:
-    driver-class-name: org.h2.Driver
+    url: jdbc:tc:mysql:8.4:///settlement_batch
+    username: settlement
+    password: settlement
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
   jpa:
     hibernate:
       ddl-auto: create-drop
