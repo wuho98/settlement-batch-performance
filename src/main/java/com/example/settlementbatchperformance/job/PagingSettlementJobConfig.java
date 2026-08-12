@@ -4,6 +4,7 @@ import com.example.settlementbatchperformance.domain.Settlement;
 import jakarta.persistence.EntityManagerFactory;
 import java.util.Map;
 import org.hibernate.jpa.HibernateHints;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
@@ -26,6 +27,7 @@ public class PagingSettlementJobConfig {
     public static final int FETCH_SIZE = 1_000;
 
     @Bean
+    @StepScope
     public JpaPagingItemReader<Settlement> pagingSettlementReader(
             EntityManagerFactory entityManagerFactory) {
         return new JpaPagingItemReaderBuilder<Settlement>()
