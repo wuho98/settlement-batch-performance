@@ -2,6 +2,8 @@ package com.example.settlementbatchperformance.job;
 
 import com.example.settlementbatchperformance.domain.Settlement;
 import jakarta.persistence.EntityManagerFactory;
+import java.util.Map;
+import org.hibernate.jpa.HibernateHints;
 import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
@@ -21,6 +23,7 @@ public class PagingSettlementJobConfig {
     public static final String STEP_NAME = "pagingSettlementStep";
     public static final int CHUNK_SIZE = 1_000;
     public static final int PAGE_SIZE = 1_000;
+    public static final int FETCH_SIZE = 1_000;
 
     @Bean
     public JpaPagingItemReader<Settlement> pagingSettlementReader(
@@ -29,6 +32,7 @@ public class PagingSettlementJobConfig {
                 .name("pagingSettlementReader")
                 .entityManagerFactory(entityManagerFactory)
                 .queryString("select s from Settlement s order by s.id asc")
+                .hintValues(Map.of(HibernateHints.HINT_FETCH_SIZE, FETCH_SIZE))
                 .pageSize(PAGE_SIZE)
                 .saveState(true)
                 .build();

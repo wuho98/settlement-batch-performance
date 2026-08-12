@@ -227,6 +227,13 @@ docker compose exec -T mysql mysql -usettlement -psettlement settlement_batch < 
 ./gradlew bootRun --args='--spring.batch.job.name=pagingSettlementJob run.id=1'
 ```
 
+Zero Offset 방식은 아래 Job 이름으로 실행합니다. 이 Reader는 Step scope로 실행마다 독립된
+`lastId` 상태를 가지며, Spring Batch ExecutionContext에 체크포인트를 저장합니다.
+
+```bash
+./gradlew bootRun --args='--spring.batch.job.name=zeroOffsetSettlementJob run.id=1'
+```
+
 웹 서버를 사용하지 않는 배치 전용 애플리케이션이므로 8080 포트를 점유하지 않습니다.
 
 ### 6. MySQL 종료
