@@ -1,0 +1,16 @@
+benchmark_id=20260813-500k-baseline-01
+benchmark_database=settlement_benchmark_500k
+dataset_size=500000
+captured_at=2026-08-13T19:28:55+0900
+git_commit=8010a8a34399ab293dc0595d6db67af0187cedcb
+git_branch=perf/100k-benchmark
+worktree_dirty=true
+os=Darwin wuhoui-MacBookAir.local 25.5.0 Darwin Kernel Version 25.5.0: Tue Jun  9 22:28:17 PDT 2026; root:xnu-12377.121.10~1/RELEASE_ARM64_T8142 arm64
+java_home=/Users/wuho/Library/Java/JavaVirtualMachines/graalvm-jdk-21.0.7/Contents/Home
+java_version=java version "21.0.7" 2025-04-15 LTS
+docker_server_version=29.6.1
+mysql_image=mysql:8.4
+mysql_version=8.4.10
+cpu=Apple M5
+logical_cpu=10
+memory_bytes=17179869184
