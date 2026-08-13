@@ -1,0 +1,8 @@
+ M README.md
+ M scripts/run-100k-benchmark.sh
+?? database/generate-dataset.sql
+?? database/verify-dataset.sql
+?? docs/
+?? results/20260813-1m-baseline-01/
+?? results/20260813-500k-baseline-01/
+?? scripts/run-benchmark.sh

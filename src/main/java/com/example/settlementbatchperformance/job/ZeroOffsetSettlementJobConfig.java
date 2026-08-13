@@ -10,6 +10,7 @@ import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.infrastructure.item.ItemStreamReader;
 import org.springframework.batch.infrastructure.item.ItemWriter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -27,9 +28,14 @@ public class ZeroOffsetSettlementJobConfig {
     @Bean
     @StepScope
     public ItemStreamReader<Settlement> zeroOffsetSettlementReader(
-            EntityManagerFactory entityManagerFactory) {
+            EntityManagerFactory entityManagerFactory,
+            @Value("${benchmark.enabled:false}") boolean benchmarkMetricsEnabled) {
         return new ZeroOffsetItemReader(
-                READER_NAME, entityManagerFactory, PAGE_SIZE, FETCH_SIZE);
+                READER_NAME,
+                entityManagerFactory,
+                PAGE_SIZE,
+                FETCH_SIZE,
+                benchmarkMetricsEnabled);
     }
 
     @Bean

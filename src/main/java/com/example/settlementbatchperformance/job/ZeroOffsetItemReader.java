@@ -1,8 +1,10 @@
 package com.example.settlementbatchperformance.job;
 
 import com.example.settlementbatchperformance.domain.Settlement;
+import com.example.settlementbatchperformance.metrics.BenchmarkPageLog;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityTransaction;
 import java.util.Collections;
 import java.util.List;
 import org.springframework.batch.infrastructure.item.ExecutionContext;
@@ -26,15 +28,26 @@ public class ZeroOffsetItemReader extends AbstractItemStreamItemReader<Settlemen
     private final EntityManagerFactory entityManagerFactory;
     private final int pageSize;
     private final int fetchSize;
+    private final boolean benchmarkMetricsEnabled;
 
     private EntityManager entityManager;
     private List<Settlement> page = Collections.emptyList();
     private int index;
     private long lastId = INITIAL_LAST_ID;
     private boolean exhausted;
+    private int pageNumber;
 
     public ZeroOffsetItemReader(
             String name, EntityManagerFactory entityManagerFactory, int pageSize, int fetchSize) {
+        this(name, entityManagerFactory, pageSize, fetchSize, false);
+    }
+
+    public ZeroOffsetItemReader(
+            String name,
+            EntityManagerFactory entityManagerFactory,
+            int pageSize,
+            int fetchSize,
+            boolean benchmarkMetricsEnabled) {
         Assert.hasText(name, "name must not be blank");
         Assert.notNull(entityManagerFactory, "entityManagerFactory must not be null");
         Assert.isTrue(pageSize > 0, "pageSize must be greater than zero");
@@ -44,6 +57,7 @@ public class ZeroOffsetItemReader extends AbstractItemStreamItemReader<Settlemen
         this.entityManagerFactory = entityManagerFactory;
         this.pageSize = pageSize;
         this.fetchSize = fetchSize;
+        this.benchmarkMetricsEnabled = benchmarkMetricsEnabled;
     }
 
     @Override
@@ -53,6 +67,7 @@ public class ZeroOffsetItemReader extends AbstractItemStreamItemReader<Settlemen
         page = Collections.emptyList();
         index = 0;
         exhausted = false;
+        pageNumber = 0;
         entityManager = entityManagerFactory.createEntityManager();
     }
 
@@ -79,15 +94,37 @@ public class ZeroOffsetItemReader extends AbstractItemStreamItemReader<Settlemen
     }
 
     private void loadNextPage() {
-        page = entityManager
-                .createQuery(
-                        "select s from Settlement s where s.id > :lastId order by s.id asc",
-                        Settlement.class)
-                .setParameter("lastId", lastId)
-                .setHint(HibernateHints.HINT_FETCH_SIZE, fetchSize)
-                .setMaxResults(pageSize)
-                .getResultList();
+        long queryLastId = lastId;
+        long startedAt = System.nanoTime();
+        EntityTransaction transaction = entityManager.getTransaction();
+        transaction.begin();
+        try {
+            page = entityManager
+                    .createQuery(
+                            "select s from Settlement s where s.id > :lastId order by s.id asc",
+                            Settlement.class)
+                    .setParameter("lastId", queryLastId)
+                    .setHint(HibernateHints.HINT_FETCH_SIZE, fetchSize)
+                    .setMaxResults(pageSize)
+                    .getResultList();
+            transaction.commit();
+        } catch (RuntimeException exception) {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw exception;
+        }
+        long durationNanos = System.nanoTime() - startedAt;
         index = 0;
+
+        BenchmarkPageLog.record(
+                benchmarkMetricsEnabled,
+                "ZERO_OFFSET",
+                pageNumber++,
+                "LAST_ID",
+                queryLastId == INITIAL_LAST_ID ? "INITIAL" : Long.toString(queryLastId),
+                page,
+                durationNanos);
 
         if (page.isEmpty()) {
             exhausted = true;

@@ -245,7 +245,7 @@ Settlement(
 - 데이터 건수 대비 실행 시간 그래프
 - 보조 인덱스 ON/OFF DDL과 `EXPLAIN` 결과
 - GC 로그 또는 힙 측정 결과
-- 주요 판단과 트레이드오프를 정리한 `DECISIONS.md` (예정)
+- 주요 판단과 트레이드오프를 정리한 `DECISIONS.md`
 
 ### PAAR 서술 기준
 
