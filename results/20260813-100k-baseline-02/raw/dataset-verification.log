@@ -1,0 +1,10 @@
+total_count	distinct_id_count	min_id	max_id
+100000	100000	1	100000
+status	row_count
+COMPLETED	80000
+FAILED	5000
+PENDING	15000
+merchant_count	min_rows_per_merchant	max_rows_per_merchant
+1000	100	100
+min_amount	max_amount	first_settled_at	last_settled_at
+102.22	999987.28	2025-01-01 00:00:37.000000	2025-12-31 23:35:15.000000

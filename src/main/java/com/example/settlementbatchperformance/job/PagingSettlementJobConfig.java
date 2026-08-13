@@ -12,7 +12,7 @@ import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.infrastructure.item.ItemWriter;
 import org.springframework.batch.infrastructure.item.database.JpaPagingItemReader;
-import org.springframework.batch.infrastructure.item.database.builder.JpaPagingItemReaderBuilder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -29,15 +29,16 @@ public class PagingSettlementJobConfig {
     @Bean
     @StepScope
     public JpaPagingItemReader<Settlement> pagingSettlementReader(
-            EntityManagerFactory entityManagerFactory) {
-        return new JpaPagingItemReaderBuilder<Settlement>()
-                .name("pagingSettlementReader")
-                .entityManagerFactory(entityManagerFactory)
-                .queryString("select s from Settlement s order by s.id asc")
-                .hintValues(Map.of(HibernateHints.HINT_FETCH_SIZE, FETCH_SIZE))
-                .pageSize(PAGE_SIZE)
-                .saveState(true)
-                .build();
+            EntityManagerFactory entityManagerFactory,
+            @Value("${benchmark.enabled:false}") boolean benchmarkMetricsEnabled) {
+        TimedJpaPagingItemReader reader =
+                new TimedJpaPagingItemReader(entityManagerFactory, benchmarkMetricsEnabled);
+        reader.setName("pagingSettlementReader");
+        reader.setQueryString("select s from Settlement s order by s.id asc");
+        reader.setHintValues(Map.of(HibernateHints.HINT_FETCH_SIZE, FETCH_SIZE));
+        reader.setPageSize(PAGE_SIZE);
+        reader.setSaveState(true);
+        return reader;
     }
 
     @Bean
